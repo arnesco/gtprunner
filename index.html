@@ -49,37 +49,21 @@
   <div id="response"></div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const prompt = urlParams.get('prompt');
-    if (prompt) {
-      document.getElementById('promptBox').value = decodeURIComponent(prompt);
-    }
-
-    async function sendPrompt() {
-      const promptText = document.getElementById('promptBox').value;
-      const responseBox = document.getElementById('response');
-
-      responseBox.innerHTML = 'Sto generando la risposta...';
-
-      try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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' // <-- Inserisci qui la tua API Key
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: promptText }]
-          })
-        });
-
-        const data = await res.json();
-        responseBox.innerHTML = data.choices?.[0]?.message?.content || 'Nessuna risposta generata.';
-      } catch (error) {
-        responseBox.innerHTML = 'Errore durante la chiamata all'API: ' + error;
+  // Decodifica il parametro dalla URL
+  window.onload = () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const promptParam = params.get('prompt');
+      if (promptParam) {
+        document.getElementById('promptBox').value = decodeURIComponent(promptParam.replace(/\+/g, ' '));
+      } else {
+        document.getElementById('promptBox').placeholder = "Nessun prompt trovato nell'URL.";
       }
+    } catch (e) {
+      document.getElementById('promptBox').placeholder = "Errore nella lettura del prompt.";
     }
-  </script>
+  };
+</script>
+
 </body>
 </html>
