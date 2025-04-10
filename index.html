@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esegui Prompt con GPT</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f9f9f9;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background-color: #10a37f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #response {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Esegui Prompt con GPT</h2>
+  <textarea id="promptBox" placeholder="Il prompt verrà inserito automaticamente..."></textarea>
+  <button onclick="sendPrompt()">Esegui con GPT</button>
+  <div id="response"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawPrompt = urlParams.get('prompt');
+      if (rawPrompt) {
+        const decodedPrompt = decodeURIComponent(decodeURIComponent(rawPrompt.replace(/\+/g, ' ')));
+        document.getElementById('promptBox').value = decodedPrompt;
+      } else {
+        document.getElementById('promptBox').placeholder = "Nessun prompt trovato nell'URL.";
+      }
+    });
+
+    async function sendPrompt() {
+      const promptText = document.getElementById('promptBox').value;
+      const responseBox = document.getElementById('response');
+
+      if (!promptText.trim()) {
+        responseBox.innerHTML = 'Inserisci un prompt valido.';
+        return;
+      }
+
+      responseBox.innerHTML = 'Sto generando la risposta...';
+
+      try {
+        const res = await fetch('/.netlify/functions/gpt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prompt: promptText })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          responseBox.innerHTML = data.response;
+        } else {
+          responseBox.innerHTML = 'Errore API: ' + data.error;
+        }
+      } catch (error) {
+        responseBox.innerHTML = 'Errore di rete: ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
