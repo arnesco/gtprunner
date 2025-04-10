@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -49,15 +50,25 @@
   <div id="response"></div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const prompt = urlParams.get('prompt');
-    if (prompt) {
-      document.getElementById('promptBox').value = decodeURIComponent(prompt);
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawPrompt = urlParams.get('prompt');
+      if (rawPrompt) {
+        const decodedPrompt = decodeURIComponent(decodeURIComponent(rawPrompt.replace(/\+/g, ' ')));
+        document.getElementById('promptBox').value = decodedPrompt;
+      } else {
+        document.getElementById('promptBox').placeholder = "Nessun prompt trovato nell'URL.";
+      }
+    });
 
     async function sendPrompt() {
       const promptText = document.getElementById('promptBox').value;
       const responseBox = document.getElementById('response');
+
+      if (!promptText.trim()) {
+        responseBox.innerHTML = 'Inserisci un prompt valido.';
+        return;
+      }
 
       responseBox.innerHTML = 'Sto generando la risposta...';
 
@@ -66,7 +77,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer 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' // <-- Inserisci qui la tua API Key
+            'Authorization': 'Bearer YOUR_API_KEY_HERE'
           },
           body: JSON.stringify({
             model: 'gpt-3.5-turbo',
@@ -77,7 +88,7 @@
         const data = await res.json();
         responseBox.innerHTML = data.choices?.[0]?.message?.content || 'Nessuna risposta generata.';
       } catch (error) {
-        responseBox.innerHTML = 'Errore durante la chiamata all'API: ' + error;
+        responseBox.innerHTML = 'Errore durante la chiamata all\'API: ' + error;
       }
     }
   </script>
